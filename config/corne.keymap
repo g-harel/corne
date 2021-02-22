@@ -20,11 +20,11 @@
                 compatible = "zmk,keymap";
 
                 default_layer {
-//        --------------------------------------------------------------------------
-//        | TAB |  Q  |  W  |  E  |  R  |  T  ||  Y  |  U  |  I  |  O  |  P  | BSP |
-//        | CRL |  A  |  S  |  D  |  F  |  G  ||  H  |  J  |  K  |  L  |  ;  |  '  |
-//        | SHT |  Z  |  X  |  C  |  V  |  B  ||  N  |  M  |  ,  |  .  |  /  | LWR |
-//                          | ALT | LWR | SPC || ENT | RSE | GUI |
+// --------------------------------------------------------------------------
+// | TAB |  Q  |  W  |  E  |  R  |  T  ||  Y  |  U  |  I  |  O  |  P  | BSP |
+// | CRL |  A  |  S  |  D  |  F  |  G  ||  H  |  J  |  K  |  L  |  ;  |  '  |
+// | SHT |  Z  |  X  |  C  |  V  |  B  ||  N  |  M  |  ,  |  .  |  /  | LWR |
+//                   | ALT | LWR | SPC || ENT | RSE | GUI |
 
                         bindings = <
 &kp TAB   &kp Q &kp W &kp E    &kp R &kp T      &kp Y   &kp U &kp I     &kp O   &kp P    &kp BSPC
@@ -35,26 +35,26 @@
                 };
 
                 lower_layer {
-//    --------------------------------------------------------------------------
-//    | ESC |  1  |  2  |  3  |  4  |  5  ||  6  |  7  |  8  |  9  |  0  | DEL |
-//    |  v  |     |     |     |     |     ||     |     | HME | UP  | END |     |
-//    |  v  |     |     |     |     |     ||     |     | LFT | DWN | RGT |  v  |
-//                      |  v  |  v  |  v  ||  v  |  v  |  v  |
+// --------------------------------------------------------------------------
+// | ESC |  1  |  2  |  3  |  4  |  5  ||  6  |  7  |  8  |  9  |  0  | DEL |
+// |  v  |     |     |     |     |     ||     |     | HME | UP  | END |     |
+// |  v  |     |     |     |     |     ||     |     | LFT | DWN | RGT |  v  |
+//                   |  v  |  v  |  v  ||  v  |  v  |  v  |
 
                         bindings = <
 &kp ESC &kp N1 &kp N2 &kp N3 &kp N4 &kp N5  &kp N6 &kp N7 &kp N8   &kp N9   &kp N0    &kp DEL
-&trans  &none  &none  &none  &none  &none   &none  &none  &kp END  &kp UP   &kp HOME  &none
+&trans  &none  &none  &none  &none  &none   &none  &none  &kp HOME &kp UP   &kp END   &none
 &trans  &none  &none  &none  &none  &none   &none  &none  &kp LEFT &kp DOWN &kp RIGHT &trans
                       &trans &trans &trans  &trans &trans &trans
                         >;
                 };
 
                 raise_layer {
-//                                  --------------------------------------------------------------------------
-//                                  | F12 | F1  | F2  | F3  | F4  | F5  || F6  | F7  | F8  | F9  | F10 | F11 |
-//                                  |  v  |     |     |     | BLE | USB ||     |  -  |  =  |  \  |  `  |     |
-//                                  |  v  | BT0 | BT1 | BT3 | BT4 | BTC ||     |  [  |  ]  |     |     |  v  |
-//                                                    |  v  |  v  |  v  ||  v  |  v  |  v  |
+// --------------------------------------------------------------------------
+// | F12 | F1  | F2  | F3  | F4  | F5  || F6  | F7  | F8  | F9  | F10 | F11 |
+// |  v  |     |     |     | BLE | USB ||     |  -  |  =  |  \  |  `  |     |
+// |  v  | BT0 | BT1 | BT3 | BT4 | BTC ||     |  [  |  ]  |     |     |  v  |
+//                   |  v  |  v  |  v  ||  v  |  v  |  v  |
 
                         bindings = <
 &kp F12 &kp F1       &kp F2       &kp F3       &kp F4       &kp F5        &kp F6 &kp F7    &kp F8    &kp F9   &kp F10   &kp F11
