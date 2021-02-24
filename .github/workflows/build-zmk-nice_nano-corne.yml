@@ -28,7 +28,7 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
       - name: West Init
-        run: west init -l corne/zmk
+        run: west init -config
       - name: West Update
         run: west update
       - name: West Zephyr export
