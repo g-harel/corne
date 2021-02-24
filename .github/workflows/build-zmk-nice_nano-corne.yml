@@ -1,13 +1,13 @@
 on: [push, pull_request, workflow_dispatch]
 
-name: Build
+name: Build ZMK nice!nano Corne
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
       image: zmkfirmware/zmk-build-arm:2.4
-    name: Build
+    name: Build ZMK nice!nano Corne
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -28,13 +28,13 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
       - name: West Init
-        run: west init -l config
+        run: west init -l corne/zmk
       - name: West Update
         run: west update
       - name: West Zephyr export
         run: west zephyr-export
       - name: West Build (Corne Left)
-        run: west build -s zmk/app -b nice_nano -- -DSHIELD=corne_left -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+        run: west build -s zmk/app -b nice_nano -- -DSHIELD=corne_left -DZMK_CONFIG="${GITHUB_WORKSPACE}/corne/zmk"
       - name: Corne DTS File
         if: ${{ always() }}
         run: cat -n build/zephyr/nice_nano.dts.pre.tmp
@@ -48,7 +48,7 @@ jobs:
           name: firmware
           path: corne_left_nice_nano.uf2
       - name: West Build (Corne Right)
-        run: west build --pristine -s zmk/app -b nice_nano -- -DSHIELD=corne_right -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+        run: west build --pristine -s zmk/app -b nice_nano -- -DSHIELD=corne_right -DZMK_CONFIG="${GITHUB_WORKSPACE}/corne/zmk"
 
       - name: Corne Right Kconfig file
         run: cat build/zephyr/.config | grep -v "^#" | grep -v "^$"
