@@ -11,6 +11,7 @@
 
 // Features
 // - Modifiers are universal and none of the other keys pass through.
+// - Ctrl/Tab are swapped like HHKB.
 // - One handed access to most common keys.
 // - Numbers and function keys have the same numbers.
 // - Arrow keys mapped similarly to HHKB with pinky on Fn (LWR).
