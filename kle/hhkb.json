@@ -1,0 +1,277 @@
+[
+  {
+    "name": "HHKB"
+  },
+  [
+    {
+      "t": "#0100ff\n\n\n\n\n\n\n\n\n#000000",
+      "f": 2,
+      "fa": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3
+      ]
+    },
+    "Power\n\n\n\n\n\n\n\n\nEsc",
+    {
+      "t": "#0100ff\n\n\n\n\n\n\n\n\n#000000\n#000000"
+    },
+    "F1\n\n\n\n\n\n\n\n\n1\n!",
+    "F2\n\n\n\n\n\n\n\n\n2\n@",
+    "F3\n\n\n\n\n\n\n\n\n3\n#",
+    "F4\n\n\n\n\n\n\n\n\n4\n$",
+    "F5\n\n\n\n\n\n\n\n\n5\n%",
+    "F6\n\n\n\n\n\n\n\n\n6\n^",
+    "F7\n\n\n\n\n\n\n\n\n7\n&",
+    "F8\n\n\n\n\n\n\n\n\n8\n*",
+    "F9\n\n\n\n\n\n\n\n\n9\n(",
+    "F10\n\n\n\n\n\n\n\n\n0\n)",
+    "F11\n\n\n\n\n\n\n\n\n-\n_",
+    "F12\n\n\n\n\n\n\n\n\n=\n+",
+    "Ins\n\n\n\n\n\n\n\n\n\\\n|",
+    "Del\n\n\n\n\n\n\n\n\n`\n~"
+  ],
+  [
+    {
+      "t": "#0100ff\n\n\n\n\n\n\n\n\n#000000",
+      "w": 1.5
+    },
+    "Caps\n\n\n\n\n\n\n\n\nTab",
+    {
+      "t": "#000000",
+      "a": 7,
+      "fa": [
+        3
+      ]
+    },
+    "Q",
+    "W",
+    "E",
+    "R",
+    "T",
+    "Y",
+    "U",
+    {
+      "t": "#0100ff\n\n\n\n\n\n\n\n\n#000000",
+      "a": 4,
+      "fa": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3
+      ]
+    },
+    "PSc/SRq\n\n\n\n\n\n\n\n\nI",
+    "ScrLk\n\n\n\n\n\n\n\n\nO",
+    "Pus/Brk\n\n\n\n\n\n\n\n\nP",
+    {
+      "t": "#0100ff\n\n\n\n\n\n\n\n\n#000000\n#000000"
+    },
+    "Up\n\n\n\n\n\n\n\n\n[\n{",
+    {
+      "t": "#000000",
+      "a": 5,
+      "fa": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3
+      ]
+    },
+    "\n}\n\n\n\n\n]",
+    {
+      "a": 7,
+      "fa": [
+        3
+      ],
+      "w": 1.5
+    },
+    "Backspace"
+  ],
+  [
+    {
+      "w": 1.75
+    },
+    "Ctrl",
+    {
+      "t": "#0100ff\n\n\n\n\n\n\n\n\n#000000",
+      "a": 4,
+      "fa": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3
+      ]
+    },
+    "Vol_Dn\n\n\n\n\n\n\n\n\nA",
+    "Vol_Up\n\n\n\n\n\n\n\n\nS",
+    "Mute\n\n\n\n\n\n\n\n\nD",
+    "Eject\n\n\n\n\n\n\n\n\nF",
+    {
+      "t": "#000000",
+      "a": 7,
+      "fa": [
+        3
+      ]
+    },
+    "G",
+    {
+      "t": "#0100ff\n\n\n\n\n\n\n\n\n#000000",
+      "a": 4,
+      "fa": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3
+      ]
+    },
+    "*\n\n\n\n\n\n\n\n\nH",
+    "/\n\n\n\n\n\n\n\n\nJ",
+    "Home\n\n\n\n\n\n\n\n\nK",
+    "PgUp\n\n\n\n\n\n\n\n\nL",
+    {
+      "t": "#0100ff\n\n\n\n\n\n\n\n\n#000000\n#000000"
+    },
+    "Left\n\n\n\n\n\n\n\n\n;\n:",
+    {
+      "fa": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3
+      ]
+    },
+    "Right\n\n\n\n\n\n\n\n\n'\n\"",
+    {
+      "t": "#000000",
+      "a": 7,
+      "fa": [
+        3
+      ],
+      "w": 2.25
+    },
+    "Enter"
+  ],
+  [
+    {
+      "w": 2.25
+    },
+    "Shift",
+    "Z",
+    "X",
+    "C",
+    "V",
+    "B",
+    {
+      "t": "#0100ff\n\n\n\n\n\n\n\n\n#000000",
+      "a": 4,
+      "fa": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3
+      ]
+    },
+    "+\n\n\n\n\n\n\n\n\nN",
+    "-\n\n\n\n\n\n\n\n\nM",
+    {
+      "t": "#0100ff\n\n\n\n\n\n\n\n\n#000000\n#000000"
+    },
+    "End\n\n\n\n\n\n\n\n\n,\n<",
+    "PgDn\n\n\n\n\n\n\n\n\n.\n>",
+    "Down\n\n\n\n\n\n\n\n\n/\n?",
+    {
+      "t": "#000000",
+      "a": 7,
+      "fa": [
+        3
+      ],
+      "w": 1.75
+    },
+    "Shift",
+    {
+      "c": "#8c94ff"
+    },
+    "Fn"
+  ],
+  [
+    {
+      "x": 1.5,
+      "c": "#cccccc"
+    },
+    "Alt",
+    {
+      "w": 1.5
+    },
+    "Super",
+    {
+      "w": 6
+    },
+    "",
+    {
+      "w": 1.5
+    },
+    "Super",
+    "Ctrl"
+  ],
+  [
+    {
+      "x": 0.25,
+      "a": 4,
+      "f": 3,
+      "fa": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        5
+      ],
+      "w": 4.5,
+      "d": true
+    },
+    "\n<tt>github.com/g-harel/kbd\n\n\n\n\n<b>HHKB"
+  ]
+]
