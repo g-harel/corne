@@ -6,7 +6,7 @@
 
 ![](kle/id80.png)
 
-# Generic
+# Standard
 
 ![](kle/hhkb.png)
 
