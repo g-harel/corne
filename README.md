@@ -1,5 +1,7 @@
 ![](kle/alix40.png)
 
+![](kle/candybar.png)
+
 ![](kle/corne.png)
 
 ![](kle/discipline65.png)
