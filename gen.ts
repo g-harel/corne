@@ -103,11 +103,102 @@ const renderKeyboard = (keyboard: Keyboard): Canvas => {
     return canvas;
 };
 
-const outFile = glob
+export class Element {
+    private attributes: Record<string, string | number> = {};
+    private children: any[] = [];
+
+    public constructor(public tag: string) {}
+
+    public attr(key: string, value: string | number): Element {
+        this.attributes[key] = value;
+        return this;
+    }
+
+    public child(element: Element): Element {
+        this.children.push(element);
+        return this;
+    }
+
+    public render(): string {
+        const attributes = this.renderAttributes();
+        const content = this.renderChildren();
+        if (content === "") {
+            return `<${this.tag}${attributes}/>`;
+        }
+        return `<${this.tag}${attributes}>${content}</${this.tag}>`;
+    }
+
+    private renderAttributes(): string {
+        const attributes = Object.keys(this.attributes);
+        if (attributes.length === 0) return "";
+        let out = "";
+        for (const attribute of attributes) {
+            out += ` ${attribute}="${this.attributes[attribute]}"`;
+        }
+        return out;
+    }
+
+    private renderChildren(): string {
+        let out = "";
+        for (const child of this.children) {
+            out += child.render();
+        }
+        return out;
+    }
+}
+
+const LAYOUT_PADDING = 0.4; // TODO
+const KEY_RADIUS2 = 0.1;
+const KEY_STROKE = "#000000";
+const KEY_STROKE_WIDTH = KEY_RADIUS2 / 2;
+
+const render2 = (keyboard: Keyboard): string => {
+    const maxUnits: {x: number; y: number} = keyboard.keys.reduce(
+        (max, key) => {
+            max.x = Math.max(max.x, key.x + key.width);
+            max.x = Math.max(max.x, key.x + key.x2 + key.width2);
+            max.y = Math.max(max.y, key.y + key.height);
+            max.y = Math.max(max.y, key.y + key.y2 + key.height2);
+            return max;
+        },
+        {x: 0, y: 0},
+    );
+
+    const parent = new Element("svg")
+        .attr("viewBox", `0 0 ${maxUnits.x} ${maxUnits.y}`)
+        .attr("width", PIXEL_WIDTH)
+        .attr("height", (PIXEL_WIDTH * maxUnits.y) / maxUnits.x);
+
+    keyboard.keys.forEach((key) => {
+        parent.child(
+            new Element("rect")
+                .attr(
+                    "style",
+                    `fill:${key.color};stroke:${KEY_STROKE};stroke-width:${KEY_STROKE_WIDTH};`,
+                )
+                .attr("x", key.x)
+                .attr("y", key.y)
+                .attr("rx", KEY_RADIUS2)
+                .attr("width", key.width)
+                .attr("height", key.height),
+        );
+    });
+
+    return parent.render();
+};
+
+let outFile = glob
     .sync("kle/**/*.json")
     .map((path) => fs.readFileSync(path).toString())
     .map((contents) => Serial.parse(contents))
     .map(renderKeyboard)
     .reduce((o, c) => o + `<img src="${c.toDataURL("image/png")}" />`, "");
+
+outFile = glob
+    .sync("kle/**/*.json")
+    .map((path) => fs.readFileSync(path).toString())
+    .map((contents) => Serial.parse(contents))
+    .map(render2)
+    .reduce((o, s) => o + s, "");
 
 fs.writeFileSync(".out.html", outFile);
