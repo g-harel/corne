@@ -79,12 +79,15 @@ const LAYOUT_PADDING = 0.4; // TODO
 const KEY_STROKE_DARKEN = 0.7;
 const KEY_SHINE_DIFF = 0.15;
 
-// Shape
-const KEY_RADIUS = 0.1;
-const KEY_STROKE_WIDTH = 0.015;
-const SHINE_PADDING_TOP = 0.05;
-const SHINE_PADDING_SIDE = 0.12;
-const SHINE_PADDING_BOTTOM = 0.2;
+// Sizes
+const KEY = 1;
+const KEY_RADIUS = KEY * 0.1;
+const KEY_STROKE_WIDTH = KEY * 0.015;
+const SHINE_PADDING_TOP = KEY * 0.05;
+const SHINE_PADDING_SIDE = KEY * 0.12;
+const SHINE_PADDING_BOTTOM = KEY * 0.2;
+const FONT_UNIT = KEY * 0.035;
+const LINE_HEIGHT = KEY * 0.3;
 
 const render2 = (keyboard: Keyboard): string => {
     // TODO care about rotation.
@@ -115,6 +118,41 @@ const render2 = (keyboard: Keyboard): string => {
                 .attr("fill", k.color),
         );
 
+        // TODO front face labels (hardcode row/col values)
+        const text = new Element("g");
+        k.labels.forEach((label, i) => {
+            const size = k.textSize[i] || k.default.textSize;
+
+            const labelVerticalOffset =
+                (KEY * k.height -
+                    SHINE_PADDING_TOP -
+                    SHINE_PADDING_BOTTOM -
+                    LINE_HEIGHT) /
+                3;
+            const labelHorizontalOffset =
+                (KEY * k.width - 2 * SHINE_PADDING_SIDE) / 2;
+            const xIndex = i % 3;
+
+            const xPos = SHINE_PADDING_SIDE + labelHorizontalOffset * xIndex;
+            const yPos =
+                SHINE_PADDING_TOP +
+                LINE_HEIGHT +
+                labelVerticalOffset * Math.floor(i / 3);
+            const anchor =
+                xIndex == 0 ? "start" : xIndex == 1 ? "middle" : "end";
+
+            text.child(
+                new Element("text")
+                    .style("font-size", 3 * FONT_UNIT + FONT_UNIT * size)
+                    .style("fill", k.textColor[i] || k.default.textColor)
+                    .attr("x", xPos)
+                    .attr("y", yPos)
+                    .attr("text-anchor", anchor)
+                    .attr("font-family", "Arial, Helvetica, sans-serif")
+                    .child(label.replace("<", "&lt;")),
+            );
+        });
+
         parent.child(
             new Element("g")
                 .style(
@@ -132,8 +170,8 @@ const render2 = (keyboard: Keyboard): string => {
                         )
                         .style("stroke-width", KEY_STROKE_WIDTH)
                         .attr("rx", KEY_RADIUS)
-                        .attr("width", k.width)
-                        .attr("height", k.height),
+                        .attr("width", KEY * k.width)
+                        .attr("height", KEY * k.height),
                 )
                 .child(
                     new Element("rect")
@@ -146,23 +184,15 @@ const render2 = (keyboard: Keyboard): string => {
                         .attr("x", SHINE_PADDING_SIDE)
                         .attr("y", SHINE_PADDING_TOP)
                         .attr("rx", KEY_RADIUS)
-                        .attr("width", k.width - 2 * SHINE_PADDING_SIDE)
+                        .attr("width", KEY * k.width - 2 * SHINE_PADDING_SIDE)
                         .attr(
                             "height",
-                            k.height - SHINE_PADDING_TOP - SHINE_PADDING_BOTTOM,
+                            KEY * k.height -
+                                SHINE_PADDING_TOP -
+                                SHINE_PADDING_BOTTOM,
                         ),
                 )
-                .child(
-                    new Element("text")
-                        .style("font-size", 0.2)
-                        .style(
-                            "fill",
-                            c(k.color).darken(KEY_STROKE_DARKEN).hex(),
-                        )
-                        .attr("x", SHINE_PADDING_SIDE)
-                        .attr("y", SHINE_PADDING_TOP)
-                        .child(k.labels.join(",")),
-                ),
+                .child(text),
         );
     });
 
@@ -178,6 +208,6 @@ const outFile = glob
     .map((path) => fs.readFileSync(path).toString())
     .map((contents) => Serial.parse(contents))
     .map(render2)
-    .reduce((o, s) => o + s, "");
+    .join("\n");
 
 fs.writeFileSync(".out.html", outFile);
