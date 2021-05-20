@@ -86,8 +86,9 @@ const KEY_STROKE_WIDTH = KEY * 0.015;
 const SHINE_PADDING_TOP = KEY * 0.05;
 const SHINE_PADDING_SIDE = KEY * 0.12;
 const SHINE_PADDING_BOTTOM = KEY * 0.2;
-const FONT_UNIT = KEY * 0.035;
-const LINE_HEIGHT = KEY * 0.3;
+const FONT_UNIT = KEY * 0.033;
+const LINE_HEIGHT = FONT_UNIT * 4;
+const SHINE_PADDING = KEY * 0.05;
 
 const render2 = (keyboard: Keyboard): string => {
     // TODO care about rotation.
@@ -123,23 +124,28 @@ const render2 = (keyboard: Keyboard): string => {
         k.labels.forEach((label, i) => {
             const size = k.textSize[i] || k.default.textSize;
 
-            const labelVerticalOffset =
-                (KEY * k.height -
-                    SHINE_PADDING_TOP -
-                    SHINE_PADDING_BOTTOM -
-                    LINE_HEIGHT) /
-                3;
-            const labelHorizontalOffset =
-                (KEY * k.width - 2 * SHINE_PADDING_SIDE) / 2;
-            const xIndex = i % 3;
+            const shineWidth = k.width - 2 * SHINE_PADDING_SIDE;
+            const xOffset = i % 3;
+            const xOffsets = [
+                SHINE_PADDING_SIDE + SHINE_PADDING,
+                SHINE_PADDING_SIDE + shineWidth / 2,
+                SHINE_PADDING_SIDE + shineWidth - SHINE_PADDING,
+            ];
 
-            const xPos = SHINE_PADDING_SIDE + labelHorizontalOffset * xIndex;
-            const yPos =
-                SHINE_PADDING_TOP +
-                LINE_HEIGHT +
-                labelVerticalOffset * Math.floor(i / 3);
+            const shineHeight =
+                k.height - SHINE_PADDING_TOP - SHINE_PADDING_BOTTOM;
+            const yOffset = Math.floor(i / 3);
+            const yOffsets = [
+                SHINE_PADDING_TOP + LINE_HEIGHT + SHINE_PADDING,
+                SHINE_PADDING_TOP + shineHeight / 2 + LINE_HEIGHT / 2,
+                SHINE_PADDING_TOP + shineHeight - SHINE_PADDING,
+                k.height,
+            ];
+
+            const xPos = xOffsets[xOffset];
+            const yPos = yOffsets[yOffset];
             const anchor =
-                xIndex == 0 ? "start" : xIndex == 1 ? "middle" : "end";
+                xOffset == 0 ? "start" : xOffset == 1 ? "middle" : "end";
 
             text.child(
                 new Element("text")
