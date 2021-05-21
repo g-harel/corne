@@ -71,16 +71,14 @@ export class Element {
     }
 }
 
-// Layout
-const PIXEL_WIDTH = 1200;
-const LAYOUT_PADDING = 0.4; // TODO
-
 // Colors
 const KEY_STROKE_DARKEN = 0.7;
 const KEY_SHINE_DIFF = 0.15;
 
 // Sizes
+const PIXEL_WIDTH = 1200;
 const KEY = 1;
+const LAYOUT_PADDING = KEY * 0.1;
 const KEY_RADIUS = KEY * 0.1;
 const KEY_STROKE_WIDTH = KEY * 0.015;
 const SHINE_PADDING_TOP = KEY * 0.05;
@@ -91,6 +89,14 @@ const LINE_HEIGHT = FONT_UNIT * 4;
 const SHINE_PADDING = KEY * 0.05;
 
 const render2 = (keyboard: Keyboard): string => {
+    // TODO make optional
+    for (const key of keyboard.keys) {
+        key.x += LAYOUT_PADDING;
+        key.x2 += LAYOUT_PADDING;
+        key.y += LAYOUT_PADDING;
+        key.y2 += LAYOUT_PADDING;
+    }
+
     // TODO care about rotation.
     const maxUnits: {x: number; y: number} = keyboard.keys.reduce(
         (max, key) => {
@@ -103,8 +109,10 @@ const render2 = (keyboard: Keyboard): string => {
         {x: 0, y: 0},
     );
 
+    const viewHeight = KEY * maxUnits.x + LAYOUT_PADDING;
+    const viewWidth = KEY * maxUnits.y + LAYOUT_PADDING;
     const parent = new Element("svg")
-        .attr("viewBox", `0 0 ${maxUnits.x} ${maxUnits.y}`)
+        .attr("viewBox", `0 0 ${viewHeight} ${viewWidth}`)
         .attr("width", PIXEL_WIDTH)
         .attr("height", (PIXEL_WIDTH * maxUnits.y) / maxUnits.x);
 
@@ -119,7 +127,6 @@ const render2 = (keyboard: Keyboard): string => {
                 .attr("fill", k.color),
         );
 
-        // TODO front face labels (hardcode row/col values)
         const text = new Element("g");
         k.labels.forEach((label, i) => {
             const size = k.textSize[i] || k.default.textSize;
@@ -155,51 +162,50 @@ const render2 = (keyboard: Keyboard): string => {
                     .attr("y", yPos)
                     .attr("text-anchor", anchor)
                     .attr("font-family", "Arial, Helvetica, sans-serif")
-                    .child(label.replace("<", "&lt;")),
+                    .child(label.replace(/<.*\/?>/g, "")),
             );
         });
 
-        parent.child(
-            new Element("g")
-                .style(
-                    "transform",
-                    `rotate(${k.rotation_angle}deg) translate(${k.x}px, ${k.y}px)`,
-                )
-                // .style("transform-origin", `${xRotOrigin} ${yRotOrigin}`)
-                // .style("transform-box", "view-box")
-                .child(
-                    new Element("rect")
-                        .style("fill", k.color)
-                        .style(
-                            "stroke",
-                            c(k.color).darken(KEY_STROKE_DARKEN).hex(),
-                        )
-                        .style("stroke-width", KEY_STROKE_WIDTH)
-                        .attr("rx", KEY_RADIUS)
-                        .attr("width", KEY * k.width)
-                        .attr("height", KEY * k.height),
-                )
-                .child(
-                    new Element("rect")
-                        .style("fill", c(k.color).lighten(KEY_SHINE_DIFF).hex())
-                        .style(
-                            "stroke",
-                            c(k.color).darken(KEY_SHINE_DIFF).hex(),
-                        )
-                        .style("stroke-width", KEY_STROKE_WIDTH)
-                        .attr("x", SHINE_PADDING_SIDE)
-                        .attr("y", SHINE_PADDING_TOP)
-                        .attr("rx", KEY_RADIUS)
-                        .attr("width", KEY * k.width - 2 * SHINE_PADDING_SIDE)
-                        .attr(
-                            "height",
-                            KEY * k.height -
-                                SHINE_PADDING_TOP -
-                                SHINE_PADDING_BOTTOM,
-                        ),
-                )
-                .child(text),
+        const cap = new Element("rect")
+            .style("fill", k.color)
+            .style("stroke", c(k.color).darken(KEY_STROKE_DARKEN).hex())
+            .style("stroke-width", KEY_STROKE_WIDTH)
+            .attr("rx", KEY_RADIUS)
+            .attr("width", KEY * (k.stepped ? k.width2 : k.width))
+            .attr("height", KEY * (k.stepped ? k.height2 : k.height));
+
+        const shine = new Element("rect")
+            .style("fill", c(k.color).lighten(KEY_SHINE_DIFF).hex())
+            .style("stroke", c(k.color).darken(KEY_SHINE_DIFF).hex())
+            .style("stroke-width", KEY_STROKE_WIDTH)
+            .attr("x", SHINE_PADDING_SIDE)
+            .attr("y", SHINE_PADDING_TOP)
+            .attr("rx", KEY_RADIUS)
+            .attr("width", KEY * k.width - 2 * SHINE_PADDING_SIDE)
+            .attr(
+                "height",
+                KEY * k.height - SHINE_PADDING_TOP - SHINE_PADDING_BOTTOM,
+            );
+
+        // TODO rotate correctly when not 0,0 origin
+        const key = new Element("g").style(
+            "transform",
+            `rotate(${k.rotation_angle}deg) translate(${k.x}px, ${k.y}px)`,
         );
+        // .style("transform-origin", `${xRotOrigin} ${yRotOrigin}`)
+        // .style("transform-box", "view-box")
+
+        if (!k.decal) {
+            key.child(cap);
+            key.child(shine);
+        }
+        if (!k.ghost) {
+            key.child(text);
+        } else {
+            key.attr("opacity", 0.5);
+        }
+
+        parent.child(key);
     });
 
     return parent.render();
