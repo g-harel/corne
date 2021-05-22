@@ -280,24 +280,5 @@
     "Left",
     "Down",
     "Right"
-  ],
-  [
-    {
-      "x": 0.25,
-      "a": 4,
-      "f": 3,
-      "fa": [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        5
-      ],
-      "w": 4.5,
-      "d": true
-    },
-    "\n<tt>github.com/g-harel/kbd\n\n\n\n\n<b>TKL"
   ]
 ]
