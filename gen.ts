@@ -10,6 +10,11 @@ import * as glob from "glob";
 // TODO metadata
 // TODO optional size decoration
 
+interface Coord {
+    x: number;
+    y: number;
+}
+
 export class Element {
     private attributes: Record<string, string | number> = {};
     private styles: Record<string, string | number> = {};
@@ -77,46 +82,76 @@ const KEY_SHINE_DIFF = 0.15;
 
 // Sizes
 const PIXEL_WIDTH = 1200;
-const KEY = 1;
-const LAYOUT_PADDING = KEY * 0.1;
-const KEY_RADIUS = KEY * 0.1;
-const KEY_STROKE_WIDTH = KEY * 0.015;
-const SHINE_PADDING_TOP = KEY * 0.05;
-const SHINE_PADDING_SIDE = KEY * 0.12;
-const SHINE_PADDING_BOTTOM = KEY * 0.2;
-const FONT_UNIT = KEY * 0.033;
+const KEY_RADIUS = 0.1;
+const KEY_STROKE_WIDTH = 0.015;
+const LAYOUT_PADDING = KEY_STROKE_WIDTH / 2;
+const SHINE_PADDING_TOP = 0.05;
+const SHINE_PADDING_SIDE = 0.12;
+const SHINE_PADDING_BOTTOM = 0.2;
+const FONT_UNIT = 0.033;
 const LINE_HEIGHT = FONT_UNIT * 4;
-const SHINE_PADDING = KEY * 0.05;
+const SHINE_PADDING = 0.05;
 
-const render2 = (keyboard: Keyboard): string => {
-    // TODO make optional
+// Key's position is P and the rotation origin is R.
+const rotateCoord = (p: Coord, r: Coord, a: number): Coord => {
+    if (a === 0) return p;
+    const distanceRtoP = Math.sqrt((p.x - r.x) ** 2 + (p.y - r.y) ** 2);
+    const angleRtoP = Math.acos((p.x - r.x) / distanceRtoP);
+    const finalAngle = angleRtoP + a * (Math.PI / 180);
+    const xOffsetRtoP = distanceRtoP * Math.cos(finalAngle);
+    const yOffsetRtoP = distanceRtoP * Math.sin(finalAngle);
+    return {x: r.x + xOffsetRtoP, y: r.y + yOffsetRtoP};
+};
+
+const moveAll = (keyboard: Keyboard, x: number, y: number) => {
     for (const key of keyboard.keys) {
-        key.x += LAYOUT_PADDING;
-        key.x2 += LAYOUT_PADDING;
-        key.y += LAYOUT_PADDING;
-        key.y2 += LAYOUT_PADDING;
-        key.rotation_x += LAYOUT_PADDING;
-        key.rotation_y += LAYOUT_PADDING;
+        key.x += x;
+        key.x2 += x;
+        key.rotation_x += x;
+        key.y += y;
+        key.y2 += y;
+        key.rotation_y += y;
+    }
+};
+
+const render = (keyboard: Keyboard): string => {
+    let max: Coord = {x: 0, y: 0};
+    let min: Coord = {x: Infinity, y: Infinity};
+    for (const k of keyboard.keys) {
+        const coords: Coord[] = [];
+        coords.push({x: k.x, y: k.y});
+        coords.push({x: k.x, y: k.y + k.height});
+        coords.push({x: k.x + k.width, y: k.y + k.height});
+        coords.push({x: k.x + k.width, y: k.y});
+        coords.push({x: k.x + k.x2, y: k.y + k.y2});
+        coords.push({x: k.x + k.x2, y: k.y + k.y2 + k.height2});
+        coords.push({x: k.x + k.x2 + k.width2, y: k.y + k.y2 + k.height2});
+        coords.push({x: k.x + k.x2 + k.width2, y: k.y + k.y2});
+
+        const r: Coord = {x: k.rotation_x, y: k.rotation_y};
+        const rotated: Coord[] = coords.map((c) => {
+            return rotateCoord(c, r, k.rotation_angle);
+        });
+
+        max = {
+            x: Math.max(max.x, ...rotated.map((c) => c.x)),
+            y: Math.max(max.y, ...rotated.map((c) => c.y)),
+        };
+        min = {
+            x: Math.min(min.x, ...rotated.map((c) => c.x)),
+            y: Math.min(min.y, ...rotated.map((c) => c.y)),
+        };
     }
 
-    // TODO care about rotation.
-    const maxUnits: {x: number; y: number} = keyboard.keys.reduce(
-        (max, key) => {
-            max.x = Math.max(max.x, key.x + key.width);
-            max.x = Math.max(max.x, key.x + key.x2 + key.width2);
-            max.y = Math.max(max.y, key.y + key.height);
-            max.y = Math.max(max.y, key.y + key.y2 + key.height2);
-            return max;
-        },
-        {x: 0, y: 0},
-    );
+    // Shrink coordinates to top-left + layout padding.
+    moveAll(keyboard, -min.x + LAYOUT_PADDING, -min.y + LAYOUT_PADDING);
 
-    const viewHeight = KEY * maxUnits.x + LAYOUT_PADDING;
-    const viewWidth = KEY * maxUnits.y + LAYOUT_PADDING;
+    const viewHeight = max.x - min.x + 2 * LAYOUT_PADDING;
+    const viewWidth = max.y - min.y + 2 * LAYOUT_PADDING;
     const parent = new Element("svg")
         .attr("viewBox", `0 0 ${viewHeight} ${viewWidth}`)
         .attr("width", PIXEL_WIDTH)
-        .attr("height", (PIXEL_WIDTH * maxUnits.y) / maxUnits.x);
+        .attr("height", PIXEL_WIDTH * (viewWidth / viewHeight));
 
     keyboard.keys.forEach((k) => {
         const text = new Element("g");
@@ -163,8 +198,8 @@ const render2 = (keyboard: Keyboard): string => {
             .style("stroke", c(k.color).darken(KEY_STROKE_DARKEN).hex())
             .style("stroke-width", KEY_STROKE_WIDTH)
             .attr("rx", KEY_RADIUS)
-            .attr("width", KEY * (k.stepped ? k.width2 : k.width))
-            .attr("height", KEY * (k.stepped ? k.height2 : k.height));
+            .attr("width", k.stepped ? k.width2 : k.width)
+            .attr("height", k.stepped ? k.height2 : k.height);
 
         const shine = new Element("rect")
             .style("fill", c(k.color).lighten(KEY_SHINE_DIFF).hex())
@@ -173,35 +208,29 @@ const render2 = (keyboard: Keyboard): string => {
             .attr("x", SHINE_PADDING_SIDE)
             .attr("y", SHINE_PADDING_TOP)
             .attr("rx", KEY_RADIUS)
-            .attr("width", KEY * k.width - 2 * SHINE_PADDING_SIDE)
+            .attr("width", k.width - 2 * SHINE_PADDING_SIDE)
             .attr(
                 "height",
-                KEY * k.height - SHINE_PADDING_TOP - SHINE_PADDING_BOTTOM,
+                k.height - SHINE_PADDING_TOP - SHINE_PADDING_BOTTOM,
             );
 
-        // TODO rotate correctly when not 0,0 origin
         let key: Element;
         if (k.rotation_angle) {
-            parent.child(
-                new Element("circle")
-                    .attr("cx", k.rotation_x)
-                    .attr("cy", k.rotation_y)
-                    .attr("r", 0.05)
-                    .attr("fill", k.color),
+            const r = rotateCoord(
+                k,
+                {x: k.rotation_x, y: k.rotation_y},
+                k.rotation_angle,
             );
             key = new Element("g")
                 .style(
-                    "transform-origin",
-                    `${k.rotation_x}px ${k.rotation_y}px`,
-                )
-                .style(
                     "transform",
-                    `translate(${k.x}px, ${k.y}px) rotate(${k.rotation_angle}deg)`,
-                );
+                    `rotate(${k.rotation_angle}deg)translate(${r.x}px,${r.y}px)`,
+                )
+                .style("transform-origin", `${r.x}px ${r.y}px`);
         } else {
             key = new Element("g").style(
                 "transform",
-                `translate(${k.x}px, ${k.y}px)`,
+                `translate(${k.x}px,${k.y}px)`,
             );
         }
 
@@ -229,44 +258,7 @@ const outFile = glob
     })
     .map((path) => fs.readFileSync(path).toString())
     .map((contents) => Serial.parse(contents))
-    .map(render2)
+    .map(render)
     .join("\n");
 
-const ot =
-    `
-
-<svg width="200" height="200">
-    <g style="transform:translate(0,0)rotate(0deg);">
-        <rect style="fill:red" width="20" height="20"></rect>
-    </g>
-    <g style="transform:translate(0,0)rotate(30deg);">
-        <rect style="fill:green" width="20" height="20"></rect>
-    </g>
-    <g style="transform:translate(0,0)rotate(-30deg);">
-        <rect style="fill:blue" width="20" height="20"></rect>
-    </g>
-
-    <g style="transform:translate(30px,30px)rotate(0deg);">
-        <rect style="fill:red" width="20" height="20"></rect>
-    </g>
-    <g style="transform:translate(30px,30px)rotate(30deg);">
-        <rect style="fill:green" width="20" height="20"></rect>
-    </g>
-    <g style="transform:translate(30px,30px)rotate(-30deg);">
-         <rect style="fill:blue" width="20" height="20"></rect>
-    </g>
-
-    <g style="transform:rotate(0deg)translate(30px,30px);">
-        <rect style="fill:red" width="20" height="20"></rect>
-    </g>
-    <g style="transform:rotate(30deg)translate(30px,30px);">
-        <rect style="fill:green" width="20" height="20"></rect>
-    </g>
-    <g style="transform:rotate(-30deg)translate(30px,30px);">
-         <rect style="fill:blue" width="20" height="20"></rect>
-    </g>
-</svg>
-
-` + outFile;
-
-fs.writeFileSync(".out.html", ot);
+fs.writeFileSync(".out.html", outFile);
