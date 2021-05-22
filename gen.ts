@@ -95,6 +95,8 @@ const render2 = (keyboard: Keyboard): string => {
         key.x2 += LAYOUT_PADDING;
         key.y += LAYOUT_PADDING;
         key.y2 += LAYOUT_PADDING;
+        key.rotation_x += LAYOUT_PADDING;
+        key.rotation_y += LAYOUT_PADDING;
     }
 
     // TODO care about rotation.
@@ -117,16 +119,6 @@ const render2 = (keyboard: Keyboard): string => {
         .attr("height", (PIXEL_WIDTH * maxUnits.y) / maxUnits.x);
 
     keyboard.keys.forEach((k) => {
-        const xRotOrigin = ((k.rotation_x || 0) / maxUnits.x) * 100 + "%";
-        const yRotOrigin = ((k.rotation_y || 0) / maxUnits.y) * 100 + "%";
-        parent.child(
-            new Element("circle")
-                .attr("cx", xRotOrigin)
-                .attr("cy", yRotOrigin)
-                .attr("r", 0.05)
-                .attr("fill", k.color),
-        );
-
         const text = new Element("g");
         k.labels.forEach((label, i) => {
             const size = k.textSize[i] || k.default.textSize;
@@ -188,12 +180,30 @@ const render2 = (keyboard: Keyboard): string => {
             );
 
         // TODO rotate correctly when not 0,0 origin
-        const key = new Element("g").style(
-            "transform",
-            `rotate(${k.rotation_angle}deg) translate(${k.x}px, ${k.y}px)`,
-        );
-        // .style("transform-origin", `${xRotOrigin} ${yRotOrigin}`)
-        // .style("transform-box", "view-box")
+        let key: Element;
+        if (k.rotation_angle) {
+            parent.child(
+                new Element("circle")
+                    .attr("cx", k.rotation_x)
+                    .attr("cy", k.rotation_y)
+                    .attr("r", 0.05)
+                    .attr("fill", k.color),
+            );
+            key = new Element("g")
+                .style(
+                    "transform-origin",
+                    `${k.rotation_x}px ${k.rotation_y}px`,
+                )
+                .style(
+                    "transform",
+                    `translate(${k.x}px, ${k.y}px) rotate(${k.rotation_angle}deg)`,
+                );
+        } else {
+            key = new Element("g").style(
+                "transform",
+                `translate(${k.x}px, ${k.y}px)`,
+            );
+        }
 
         if (!k.decal) {
             key.child(cap);
@@ -222,4 +232,41 @@ const outFile = glob
     .map(render2)
     .join("\n");
 
-fs.writeFileSync(".out.html", outFile);
+const ot =
+    `
+
+<svg width="200" height="200">
+    <g style="transform:translate(0,0)rotate(0deg);">
+        <rect style="fill:red" width="20" height="20"></rect>
+    </g>
+    <g style="transform:translate(0,0)rotate(30deg);">
+        <rect style="fill:green" width="20" height="20"></rect>
+    </g>
+    <g style="transform:translate(0,0)rotate(-30deg);">
+        <rect style="fill:blue" width="20" height="20"></rect>
+    </g>
+
+    <g style="transform:translate(30px,30px)rotate(0deg);">
+        <rect style="fill:red" width="20" height="20"></rect>
+    </g>
+    <g style="transform:translate(30px,30px)rotate(30deg);">
+        <rect style="fill:green" width="20" height="20"></rect>
+    </g>
+    <g style="transform:translate(30px,30px)rotate(-30deg);">
+         <rect style="fill:blue" width="20" height="20"></rect>
+    </g>
+
+    <g style="transform:rotate(0deg)translate(30px,30px);">
+        <rect style="fill:red" width="20" height="20"></rect>
+    </g>
+    <g style="transform:rotate(30deg)translate(30px,30px);">
+        <rect style="fill:green" width="20" height="20"></rect>
+    </g>
+    <g style="transform:rotate(-30deg)translate(30px,30px);">
+         <rect style="fill:blue" width="20" height="20"></rect>
+    </g>
+</svg>
+
+` + outFile;
+
+fs.writeFileSync(".out.html", ot);
