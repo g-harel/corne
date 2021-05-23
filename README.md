@@ -1,17 +1,16 @@
-![](kle/alix40.png)
+![](kle/alix40.svg)
 
-![](kle/candybar.png)
+![](kle/candybar.svg)
 
-![](kle/corne.png)
+![](kle/corne.svg)
 
-![](kle/discipline65.png)
+![](kle/discipline65.svg)
 
-![](kle/epoch80.png)
+![](kle/epoch80.svg)
 
-![](kle/id80.png)
+![](kle/hhkb.svg)
 
-# Standard
+![](kle/id80.svg)
 
-![](kle/hhkb.png)
+![](kle/tkl.svg)
 
-![](kle/tkl.png)

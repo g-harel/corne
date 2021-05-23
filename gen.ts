@@ -1,14 +1,8 @@
 import * as fs from "fs";
 
-import {Key, Keyboard, Serial} from "@ijprest/kle-serial";
+import {Keyboard, Serial} from "@ijprest/kle-serial";
 import * as c from "color";
 import * as glob from "glob";
-
-// TODO svg?
-// TODO rotation
-// TODO padding
-// TODO metadata
-// TODO optional size decoration
 
 interface Coord {
     x: number;
@@ -76,21 +70,20 @@ export class Element {
     }
 }
 
-// Colors
-const KEY_STROKE_DARKEN = 0.7;
-const KEY_SHINE_DIFF = 0.15;
-
-// Sizes
-const PIXEL_WIDTH = 1200;
+const PIXEL_WIDTH = 838;
 const KEY_RADIUS = 0.1;
 const KEY_STROKE_WIDTH = 0.015;
-const LAYOUT_PADDING = KEY_STROKE_WIDTH / 2;
+const LAYOUT_PADDING = KEY_STROKE_WIDTH / 2 + 0.2;
+const STROKE_COLOR_DARKEN = 0.7;
+
 const SHINE_PADDING_TOP = 0.05;
 const SHINE_PADDING_SIDE = 0.12;
 const SHINE_PADDING_BOTTOM = 0.2;
+const SHINE_PADDING = 0.05;
+const SHINE_COLOR_DIFF = 0.15;
+
 const FONT_UNIT = 0.033;
 const LINE_HEIGHT = FONT_UNIT * 4;
-const SHINE_PADDING = 0.05;
 
 // Key's position is P and the rotation origin is R.
 const rotateCoord = (p: Coord, r: Coord, a: number): Coord => {
@@ -112,6 +105,19 @@ const moveAll = (keyboard: Keyboard, x: number, y: number) => {
         key.y2 += y;
         key.rotation_y += y;
     }
+};
+
+const sanitizeLabel = (label: string) => {
+    return label.replace(/[&<>]/g, (s) => {
+        switch(s) {
+            case "&":
+                return "&amp;";
+            case "<":
+                return "&lt;";
+            case ">":
+                return "&gt;";
+        }
+    });
 };
 
 const render = (keyboard: Keyboard): string => {
@@ -146,12 +152,34 @@ const render = (keyboard: Keyboard): string => {
     // Shrink coordinates to top-left + layout padding.
     moveAll(keyboard, -min.x + LAYOUT_PADDING, -min.y + LAYOUT_PADDING);
 
-    const viewHeight = max.x - min.x + 2 * LAYOUT_PADDING;
-    const viewWidth = max.y - min.y + 2 * LAYOUT_PADDING;
+    // Add size in the bottom right if key is wider than 1u.
+    for (const key of keyboard.keys) {
+        const width = key.stepped ? key.width2 : key.width;
+        if (width !== 1 && key.labels[8] == undefined) {
+            console.log(key.labels);
+            while (key.labels.length < 9) key.labels.push("");
+            key.labels[8] = String(width);
+        }
+    }
+
+    const viewWidth = max.x - min.x + 2 * LAYOUT_PADDING;
+    const viewHeight = max.y - min.y + 2 * LAYOUT_PADDING + LINE_HEIGHT + 2 * SHINE_PADDING;
     const parent = new Element("svg")
-        .attr("viewBox", `0 0 ${viewHeight} ${viewWidth}`)
+        .attr("xmlns", "http://www.w3.org/2000/svg")
+        .attr("viewBox", `0 0 ${viewWidth} ${viewHeight}`)
         .attr("width", PIXEL_WIDTH)
-        .attr("height", PIXEL_WIDTH * (viewWidth / viewHeight));
+        .attr("height", PIXEL_WIDTH * (viewHeight / viewWidth));
+
+    // Add keyboard info line.
+    parent.child(
+        new Element("text")
+            .style("font-size", 6 * FONT_UNIT)
+            .attr("x", LAYOUT_PADDING + SHINE_PADDING)
+            .attr("y", viewHeight - SHINE_PADDING - LAYOUT_PADDING)
+            .attr("font-family", "Arial, Helvetica, sans-serif")
+            .attr("font-style", "italic")
+            .child(`${keyboard.meta.name} | ${keyboard.keys.length} keys`),
+    );
 
     keyboard.keys.forEach((k) => {
         const text = new Element("g");
@@ -189,21 +217,21 @@ const render = (keyboard: Keyboard): string => {
                     .attr("y", yPos)
                     .attr("text-anchor", anchor)
                     .attr("font-family", "Arial, Helvetica, sans-serif")
-                    .child(label.replace(/<.*\/?>/g, "")),
+                    .child(sanitizeLabel(label)),
             );
         });
 
         const cap = new Element("rect")
             .style("fill", k.color)
-            .style("stroke", c(k.color).darken(KEY_STROKE_DARKEN).hex())
+            .style("stroke", c(k.color).darken(STROKE_COLOR_DARKEN).hex())
             .style("stroke-width", KEY_STROKE_WIDTH)
             .attr("rx", KEY_RADIUS)
             .attr("width", k.stepped ? k.width2 : k.width)
             .attr("height", k.stepped ? k.height2 : k.height);
 
         const shine = new Element("rect")
-            .style("fill", c(k.color).lighten(KEY_SHINE_DIFF).hex())
-            .style("stroke", c(k.color).darken(KEY_SHINE_DIFF).hex())
+            .style("fill", c(k.color).lighten(SHINE_COLOR_DIFF).hex())
+            .style("stroke", c(k.color).darken(SHINE_COLOR_DIFF).hex())
             .style("stroke-width", KEY_STROKE_WIDTH)
             .attr("x", SHINE_PADDING_SIDE)
             .attr("y", SHINE_PADDING_TOP)
@@ -224,7 +252,8 @@ const render = (keyboard: Keyboard): string => {
             key = new Element("g")
                 .style(
                     "transform",
-                    `rotate(${k.rotation_angle}deg)translate(${r.x}px,${r.y}px)`,
+                    `rotate(${k.rotation_angle}deg)` +
+                        `translate(${r.x}px,${r.y}px)`,
                 )
                 .style("transform-origin", `${r.x}px ${r.y}px`);
         } else {
@@ -250,15 +279,29 @@ const render = (keyboard: Keyboard): string => {
     return parent.render();
 };
 
-const outFile = glob
-    .sync("kle/**/*.json")
-    .map((path) => {
-        console.log(path);
-        return path;
-    })
-    .map((path) => fs.readFileSync(path).toString())
-    .map((contents) => Serial.parse(contents))
-    .map(render)
-    .join("\n");
+const genOut = () => {
+    const paths = glob.sync("kle/**/*.json");
 
-fs.writeFileSync(".out.html", outFile);
+    const svgPaths: string[] = [];
+    for (const path of paths) {
+        console.log(path);
+        const rendered = render(Serial.parse(fs.readFileSync(path).toString()));
+        const svgPath = path.replace(/\.json$/g, ".svg");
+        fs.writeFileSync(svgPath, rendered);
+        svgPaths.push(svgPath);
+    }
+
+    let readmeContents = "";
+    for (const svgPath of svgPaths) {
+        readmeContents += `![](${svgPath})\n\n`;
+    }
+    fs.writeFileSync("README.md", readmeContents);
+
+    let outContents = "";
+    for (const svgPath of svgPaths) {
+        outContents += `<img src="${svgPath}"/>\n`;
+    }
+    fs.writeFileSync(".out.html", outContents);
+};
+
+genOut();
