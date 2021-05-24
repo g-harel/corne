@@ -109,7 +109,7 @@ const moveAll = (keyboard: Keyboard, x: number, y: number) => {
 
 const sanitizeLabel = (label: string) => {
     return label.replace(/[&<>]/g, (s) => {
-        switch(s) {
+        switch (s) {
             case "&":
                 return "&amp;";
             case "<":
@@ -163,7 +163,8 @@ const render = (keyboard: Keyboard): string => {
     }
 
     const viewWidth = max.x - min.x + 2 * LAYOUT_PADDING;
-    const viewHeight = max.y - min.y + 2 * LAYOUT_PADDING + LINE_HEIGHT + 2 * SHINE_PADDING;
+    const viewHeight =
+        max.y - min.y + 2 * LAYOUT_PADDING + LINE_HEIGHT + 2 * SHINE_PADDING;
     const parent = new Element("svg")
         .attr("xmlns", "http://www.w3.org/2000/svg")
         .attr("viewBox", `0 0 ${viewWidth} ${viewHeight}`)
@@ -297,11 +298,26 @@ const genOut = () => {
     }
     fs.writeFileSync("README.md", readmeContents);
 
-    let outContents = "";
+    let images = "";
     for (const svgPath of svgPaths) {
-        outContents += `<img src="${svgPath}"/>\n`;
+        images += `<img src="${svgPath}"/>\n`;
     }
-    fs.writeFileSync(".out.html", outContents);
+    const outContents = `
+<html>
+    <head>
+        <title>Keyboard Layouts</title>
+    </head>
+    <body style="padding:100px;">
+        <div style="max-width:1000px;margin:0 auto;display:flex;flex-direction:column;align-items:center;">
+            ${images}
+            <a href="https://github.com/g-harel/kbd" style="padding:40px;">
+                github.com/g-harel/kbd
+            </a>
+        </div>
+    </body>
+</html>
+    `;
+    fs.writeFileSync("index.html", outContents);
 };
 
 genOut();
