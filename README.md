@@ -1,5 +1,7 @@
 ![](kle/alix40.svg)
 
+![](kle/bear65.svg)
+
 ![](kle/candybar.svg)
 
 ![](kle/corne.svg)
