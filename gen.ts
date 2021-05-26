@@ -156,9 +156,12 @@ const render = (keyboard: Keyboard): string => {
     for (const key of keyboard.keys) {
         const width = key.stepped ? key.width2 : key.width;
         if (width !== 1 && key.labels[8] == undefined) {
-            console.log(key.labels);
             while (key.labels.length < 9) key.labels.push("");
             key.labels[8] = String(width);
+        }
+        if (width !== 1 && key.labels[8] == String(width)) {
+            while (key.textColor.length < 9) key.textColor.push(key.default.textColor);
+            key.textColor[8] = c(key.color).darken(STROKE_COLOR_DARKEN).hex();
         }
     }
 
